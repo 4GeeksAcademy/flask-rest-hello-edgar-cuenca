@@ -60,11 +60,14 @@ class Comment(db.Model):
             "post_id": self.post_id
         }
 
-ESTE CODIGO GENERA EL DIAGRAMA ACTUALIZADO 
+
 if __name__ == '__main__':
     from eralchemy2 import render_er
     try:
-        render_er(db.Model, 'diagram.png')
-        print(" ¡Éxito! El archivo diagram.png se ha actualizado correctamente.")
+        # CAMBIO AQUÍ: Usamos db.metadata en lugar de db.Model
+        render_er(db.metadata, 'diagram.png')
+        print("¡Éxito! El archivo diagram.png se ha actualizado correctamente.")
     except Exception as e:
-        print(f" Error al generar el diagrama: {e}")
+        print(f"Error al generar el diagrama: {e}")
+        # Tip adicional: Si te dice que falta una librería de sistema, 
+        # intenta instalar: sudo apt-get install graphviz (si estás en Linux/Codespaces)
