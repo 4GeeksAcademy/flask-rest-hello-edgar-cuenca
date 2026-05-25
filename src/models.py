@@ -27,6 +27,7 @@ class User(db.Model):
 class Follower(db.Model):
     __tablename__ = 'follower'
     id: Mapped[int] = mapped_column(primary_key=True)
+    # Apuntamos correctamente a la tabla 'user.id' usando db.ForeignKey
     user_from_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     user_to_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
 
@@ -35,7 +36,7 @@ class Post(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     
-    # Relación para que el diagrama dibuje la conexión
+    # Esto ayuda a eralchemy2 a dibujar las flechas de relación en el diagrama
     user = relationship("User")
 
 class Media(db.Model):
@@ -44,6 +45,8 @@ class Media(db.Model):
     type: Mapped[str] = mapped_column(Enum("video", "photo", name="media_type"), nullable=False)
     url: Mapped[str] = mapped_column(String(250), nullable=False)
     post_id: Mapped[int] = mapped_column(ForeignKey("post.id"), nullable=False)
+    
+    post = relationship("Post")
 
 class Comment(db.Model):
     __tablename__ = 'comment'
@@ -51,6 +54,9 @@ class Comment(db.Model):
     comment_text: Mapped[str] = mapped_column(String(255), nullable=False)
     author_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False)
     post_id: Mapped[int] = mapped_column(ForeignKey("post.id"), nullable=False)
+
+    author = relationship("User")
+    post = relationship("Post")
 
     def serialize(self):
         return {
@@ -60,14 +66,12 @@ class Comment(db.Model):
             "post_id": self.post_id
         }
 
-
+# Bloque de ejecución obligatorio del template para generar la imagen
 if __name__ == '__main__':
     from eralchemy2 import render_er
     try:
-        # CAMBIO AQUÍ: Usamos db.metadata en lugar de db.Model
+        # Al usar Flask-SQLAlchemy, la metadata de las tablas se extrae de db.metadata
         render_er(db.metadata, 'diagram.png')
-        print("¡Éxito! El archivo diagram.png se ha actualizado correctamente.")
+        print("¡Éxito! El archivo diagram.png se ha generado correctamente.")
     except Exception as e:
         print(f"Error al generar el diagrama: {e}")
-        # Tip adicional: Si te dice que falta una librería de sistema, 
-        # intenta instalar: sudo apt-get install graphviz (si estás en Linux/Codespaces)
